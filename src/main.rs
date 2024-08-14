@@ -93,7 +93,7 @@ async fn start_server() {
         .route("/token/:device_code", routing::post(token))
         .layer(tower_http::cors::CorsLayer::permissive())
         .with_state(share);
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind(std::env::args().next_back().unwrap()).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 

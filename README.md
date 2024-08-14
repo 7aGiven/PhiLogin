@@ -4,6 +4,9 @@ SessionToken By Web or QRcode
 # Introduction
 A HTTP Server for API to Login Phigros By Taptap
 
+# Use
+`./PhiLogin 127.0.0.1:3000`
+
 # API
 The {} is Placeholder, Please remove it.
 ```
