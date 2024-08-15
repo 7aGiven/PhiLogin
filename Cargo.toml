@@ -1,6 +1,6 @@
 [package]
 name = "PhiLogin"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -10,6 +10,7 @@ tokio = { version = "*", default-features = false, features = ["rt"] }
 axum = { version = "*", default-features = false, features = ["http1", "tokio"] }
 tower-http = { version = "*", default-features = false, features = ["cors"] }
 reqwest = { version = "*", default-features = false, features = ["default-tls", "gzip", "json"] }
+percent-encoding = { version = "*", default-features = false }
 serde = { version = "*", default-features = false, features = ["serde_derive"] }
 serde_json = { version = "*", default-features = false }
 sha1 = { version = "*", default-features = false }

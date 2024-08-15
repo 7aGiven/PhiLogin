@@ -1,6 +1,7 @@
 use tokio::runtime;
 use reqwest::Client;
 use axum::routing;
+use axum::body::Bytes;
 use axum::extract::{Path, State};
 use hmac::Mac;
 use base64::Engine;
@@ -47,18 +48,18 @@ fn mac(token: &Token) -> String {
     format!("MAC id=\"{}\",ts=\"{}\",nonce=\"{}\",mac=\"{}\"", token.kid, ts, nonce, mac)
 }
 
-async fn login(State(state): State<Share>, device_id: String) -> String {
+async fn login(State(state): State<Share>, device_id: Bytes) -> String {
     let json: Wrap<Device> = state.client.post("https://www.taptap.cn/oauth2/v1/device/code")
         .headers(state.tap.clone())
-        .body(format!("client_id=rAK3FfdieFob2Nn8Am&response_type=device_code&scope=basic_info&version=1.2.0&platform=unity&info=%7b%22device_id%22%3a%22{}%22%7d", device_id))
+        .body(format!("client_id=rAK3FfdieFob2Nn8Am&response_type=device_code&scope=basic_info&version=1.2.0&platform=unity&info=%7b%22device_id%22%3a%22{}%22%7d", percent_encoding::percent_encode(device_id.as_ref(), percent_encoding::NON_ALPHANUMERIC)))
         .send().await.unwrap().json::<Wrap<Device>>().await.unwrap();
     format!("{{\"device_code\":\"{}\",\"qrcode_url\":\"{}\"}}", json.data.device_code, json.data.qrcode_url)
 }
 
-async fn token(State(state): State<Share>, Path(device_code): Path<String>, device_id: String) -> String {
+async fn token(State(state): State<Share>, Path(device_code): Path<String>, device_id: Bytes) -> String {
     let json = state.client.post("https://www.taptap.com/oauth2/v1/token")
         .headers(state.tap.clone())
-        .body(format!("grant_type=device_token&client_id=rAK3FfdieFob2Nn8Am&secret_type=hmac-sha-1&code={}&version=1.0&platform=unity&info=%7b%22device_id%22%3a%22{}%22%7d", device_code, device_id))
+        .body(format!("grant_type=device_token&client_id=rAK3FfdieFob2Nn8Am&secret_type=hmac-sha-1&code={}&version=1.0&platform=unity&info=%7b%22device_id%22%3a%22{}%22%7d", device_code, percent_encoding::percent_encode(device_id.as_ref(), percent_encoding::NON_ALPHANUMERIC)))
         .send().await.unwrap().json::<Wrap<serde_json::Value>>().await.unwrap();
     if json.success == false {
         return serde_json::to_string(&json.data).unwrap();
