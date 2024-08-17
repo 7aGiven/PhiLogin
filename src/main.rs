@@ -21,12 +21,6 @@ struct Wrap<T> {
 }
 
 #[derive(serde::Deserialize)]
-struct Device {
-    device_code: String,
-    qrcode_url: String
-}
-
-#[derive(serde::Deserialize)]
 struct Token {
     kid: String,
     mac_key: String
@@ -49,11 +43,11 @@ fn mac(token: &Token) -> String {
 }
 
 async fn login(State(state): State<Share>, device_id: Bytes) -> String {
-    let json: Wrap<Device> = state.client.post("https://www.taptap.cn/oauth2/v1/device/code")
+    let json: Wrap<serde_json::Value> = state.client.post("https://www.taptap.cn/oauth2/v1/device/code")
         .headers(state.tap.clone())
         .body(format!("client_id=rAK3FfdieFob2Nn8Am&response_type=device_code&scope=basic_info&version=1.2.0&platform=unity&info=%7b%22device_id%22%3a%22{}%22%7d", percent_encoding::percent_encode(device_id.as_ref(), percent_encoding::NON_ALPHANUMERIC)))
-        .send().await.unwrap().json::<Wrap<Device>>().await.unwrap();
-    format!("{{\"device_code\":\"{}\",\"qrcode_url\":\"{}\"}}", json.data.device_code, json.data.qrcode_url)
+        .send().await.unwrap().json().await.unwrap();
+    serde_json::to_string(&json.data).unwrap()
 }
 
 async fn token(State(state): State<Share>, Path(device_code): Path<String>, device_id: Bytes) -> String {
