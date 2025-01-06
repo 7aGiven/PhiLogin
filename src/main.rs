@@ -69,6 +69,13 @@ async fn token(State(state): State<Share>, Path(device_code): Path<String>, devi
         .send().await.unwrap().text().await.unwrap()
 }
 
+async fn authorization(State(state): State<Share>, authorization: String) -> Bytes {
+    state.client.get("https://open.tapapis.cn/account/basic-info/v1?client_id=rAK3FfdieFob2Nn8Am")
+        .headers(state.tap.clone())
+        .header("Authorization", authorization)
+        .send().await.unwrap().bytes().await.unwrap()
+}
+
 async fn start_server() {
     let mut share = Share {
         client: reqwest::ClientBuilder::new().http1_title_case_headers()
@@ -83,12 +90,30 @@ async fn start_server() {
     share.phi.append("X-LC-Id", "rAK3FfdieFob2Nn8Am".parse().unwrap());
     share.phi.append("X-LC-Key", "Qr9AEqtuoSVS3zeD6iVbM4ZC0AtkJcQ89tywVyi0".parse().unwrap());
     share.phi.append("Content-Type", "application/json".parse().unwrap());
-    let app = axum::Router::new()
-        .route("/login", routing::post(login))
-        .route("/token/:device_code", routing::post(token))
-        .layer(tower_http::cors::CorsLayer::permissive())
-        .with_state(share);
-    let listener = tokio::net::TcpListener::bind(std::env::args().next_back().unwrap()).await.unwrap();
+    let mut cors = false;
+    let mut address = String::new();
+    for arg in std::env::args() {
+        if arg == "cors" {
+            cors = true;
+        } else {
+            address = arg;
+        }
+    }
+    let app;
+    if cors {
+        app = axum::Router::new()
+            .route("/login", routing::post(login))
+            .route("/token/{device_code}", routing::post(token))
+            .route("/authorization", routing::post(authorization))
+            .layer(tower_http::cors::CorsLayer::permissive())
+            .with_state(share);
+    } else {
+        app = axum::Router::new()
+            .route("/login", routing::post(login))
+            .route("/token/{device_code}", routing::post(token))
+            .with_state(share);
+    }
+    let listener = tokio::net::TcpListener::bind(address).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
