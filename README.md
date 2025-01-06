@@ -7,8 +7,13 @@ A HTTP Server for API to Login Phigros By Taptap
 Python verion by [@Dragon_ts](https://github.com/dragon-ts)
 
 # Use
+`./PhiLogin cors 127.0.0.1:3000`
+
+or
+
 `./PhiLogin 127.0.0.1:3000`
 
+cors argument for auto add CORS Header with no middleware(nginx etc).
 # API
 The {} is Placeholder, Please remove it.
 ```
