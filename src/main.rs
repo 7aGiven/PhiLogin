@@ -111,6 +111,7 @@ async fn start_server() {
         app = axum::Router::new()
             .route("/login", routing::post(login))
             .route("/token/{device_code}", routing::post(token))
+            .route("/authorization", routing::post(authorization))
             .with_state(share);
     }
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
