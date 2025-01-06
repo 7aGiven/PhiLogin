@@ -38,7 +38,7 @@ def mac(token):
 @app.route('/login', methods=['POST'])
 def login():
     device_id = request.data.decode()
-    url = "https://www.taptap.cn/oauth2/v1/device/code"
+    url = "https://www.taptap.com/oauth2/v1/device/code"
     payload = f"client_id=rAK3FfdieFob2Nn8Am&response_type=device_code&scope=basic_info&version=1.2.0&platform=unity&info=%7b%22device_id%22%3a%22{device_id}%22%7d"
     
     response = share.client.post(url, headers=share.tap_headers, data=payload)
@@ -65,7 +65,7 @@ def get_token(device_code):
     return jsonify(user_info)
 
 def get_account_info(token):
-    url = "https://open.tapapis.cn/account/basic-info/v1?client_id=rAK3FfdieFob2Nn8Am"
+    url = "https://openapi.taptap.com/account/basic-info/v1?client_id=rAK3FfdieFob2Nn8Am"
     headers = share.tap_headers.copy()
     headers['Authorization'] = mac(token)
     
