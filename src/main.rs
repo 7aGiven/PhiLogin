@@ -51,7 +51,7 @@ async fn login(State(state): State<Share>, device_id: Bytes) -> String {
 }
 
 async fn token(State(state): State<Share>, Path(device_code): Path<String>, device_id: Bytes) -> String {
-    let json = state.client.post("https://www.taptap.com/oauth2/v1/token")
+    let json = state.client.post("https://www.taptap.cn/oauth2/v1/token")
         .headers(state.tap.clone())
         .body(format!("grant_type=device_token&client_id=rAK3FfdieFob2Nn8Am&secret_type=hmac-sha-1&code={}&version=1.0&platform=unity&info=%7b%22device_id%22%3a%22{}%22%7d", device_code, percent_encoding::percent_encode(device_id.as_ref(), percent_encoding::NON_ALPHANUMERIC)))
         .send().await.unwrap().json::<Wrap<serde_json::Value>>().await.unwrap();
@@ -59,7 +59,7 @@ async fn token(State(state): State<Share>, Path(device_code): Path<String>, devi
         return serde_json::to_string(&json.data).unwrap();
     }
     let token: Token = serde_json::from_value(json.data).unwrap();
-    let account: Account = state.client.get("https://openapi.taptap.com/account/basic-info/v1?client_id=rAK3FfdieFob2Nn8Am")
+    let account: Account = state.client.get("https://open.tapapis.cn/account/basic-info/v1?client_id=rAK3FfdieFob2Nn8Am")
         .headers(state.tap.clone())
         .header("Authorization", mac(&token))
         .send().await.unwrap().json::<Wrap<Account>>().await.unwrap().data;
